@@ -9,7 +9,7 @@ import fileinput
 import get_wayback_machine
 import time
 import re
-
+from tqdm import tqdm
 
 # import bibtexparser
 
@@ -23,12 +23,20 @@ import re
 #     print(response.status_code)
 
 #with open("bibliography.bib") as bibtex_file:
-for line in fileinput.input("bibliography.bib", inplace=True):
+
+BIBFILE = "bibliography.bib"
+lines = 0
+with open(BIBFILE) as f:
+    for i, l in enumerate(f):
+        pass
+    lines = i+1
+
+for line in tqdm(fileinput.input(BIBFILE, inplace=True), total=lines):
     if "\\url" in line:
         response = get_wayback_machine.get('https://en.wikipedia.org')
-        if response.status_code == 200:
+        if response.status_code == 200:            
             print(re.sub(r'http','http://web.archive.org/web/http', line))
-        else:
+        else:            
             r = requests.get(re.sub(r'http','http://web.archive.org/save/http', line))
             print(re.sub(r'http','http://web.archive.org/web/http', line))
         time.sleep(5)
