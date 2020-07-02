@@ -10,6 +10,7 @@ import get_wayback_machine
 import time
 import re
 from tqdm import tqdm
+import requests
 
 # import bibtexparser
 
@@ -32,14 +33,25 @@ with open(BIBFILE) as f:
     lines = i+1
 
 for line in tqdm(fileinput.input(BIBFILE, inplace=True), total=lines):
-    if "\\url" in line:
-        response = get_wayback_machine.get('https://en.wikipedia.org')
-        if response.status_code == 200:            
-            print(re.sub(r'http','http://web.archive.org/web/http', line))
-        else:            
-            r = requests.get(re.sub(r'http','http://web.archive.org/save/http', line))
-            print(re.sub(r'http','http://web.archive.org/web/http', line))
-        time.sleep(5)
+#for line in tqdm(fileinput.input(BIBFILE), total=lines):
+    if "url" in line and "web.archive.org" not in line and "doi" not in line:
+        #print(line)
+        try:
+            url = re.search(r'(http[^"}]*)["}]', line).group(1)
+            #tqdm.write("https://web.archive.org/save/{}".format(url))
+            r = requests.get("https://web.archive.org/save/{}".format(url))
+            print(re.sub(r'http','https://web.archive.org/web/http', line))
+            # response = get_wayback_machine.get(url)
+            # if response.status_code == 200:
+            #     print(re.sub(r'http','http://web.archive.org/web/http', line))
+            # else:
+            #     r = requests.get(re.sub(r'http','http://web.archive.org/save/http', url))
+            #     print(re.sub(r'http','http://web.archive.org/web/http', line))
+        except Exception as e:
+            print("%", e)
+            print(line)
+        time.sleep(1)
 
-    else:        
+    else:
+        #pass
         print(line, end="")
